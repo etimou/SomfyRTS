@@ -23,6 +23,7 @@ Arduino Uno pin              | RFM69 pin   | AM transmitter pin|
 --                           | 3V3(power+) | VCC (power+)      |
 GND                          | GND (GND)   | GND (GND)         |          
  
+n
 
 **How the software works: ** 
 
@@ -35,7 +36,7 @@ where *3* is the pin you want to use to drive the transmitter and *TSR_RFM69* is
 You are now ready to send commands to your Somfy RTS device. Example:
 `myRTS.sendSomfy(0, DOWN);`
  
-This emulates a press on the *DOWN* button on the remote controller 0. You can theoritically emukate up to 256 remotes.
+This emulates a press on the *DOWN* button on the remote controller 0. You can theoritically emulate up to 256 remotes.
 Of course, the first command you need to send is *PROG* to pair your remote with your device. Make sure your device is in pairing mode when doing this.
 `myRTS.sendSomfy(0, PROG);`
 
