@@ -19,10 +19,8 @@ Arduino Uno pin              | RFM69 pin   | AM transmitter
 12                           | MISO        |              
 13                           | SCK         |     
 3 (user defined)             | DIO2        | Data      
-12                           | MISO        |              
-13                           | SCK         |     
-             .               | 3V3(power+) | VCC (power+)              
-             .               | GND (GND)   | GND (GND)              
+12                           | 3V3(power+) | VCC (power+)             
+13                           | GND (GND)   | GND (GND                 
 
 **How the software works: ** 
 
