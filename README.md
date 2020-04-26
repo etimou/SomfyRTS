@@ -13,15 +13,15 @@ If you want to learn more about the Somfy RTS protocol, check out [Pushtack](htt
 
 **Note:** the RFM69 module only accepts 3.3V power supply voltage. Be careful not to power it with 5V.
 
-Arduino Uno pin              | RFM69 pin   | AM transmitter
----------------------------- | ---------   | -------------
-10                           | NSS         | 
-11                           | MOSI        | 
-12                           | MISO        |              
-13                           | SCK         |     
-3 (user defined)             | DIO2        | Data      
---                           | 3V3(power+) | VCC (power+)             
---                           | GND (GND)   | GND (GND                 
+Arduino Uno pin              | RFM69 pin   | AM transmitter pin|
+---------------------------- | ---------   | -------------     |
+10                           | NSS         |                   |
+11                           | MOSI        |                   |
+12                           | MISO        |                   |
+13                           | SCK         |                   |
+3 (user defined)             | DIO2        | Data              |
+                             | 3V3(power+) | VCC (power+)      |
+GND                          | GND (GND)   | GND (GND)         |          
 
 **How the software works: ** 
 
