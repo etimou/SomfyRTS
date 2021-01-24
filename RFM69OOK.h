@@ -45,7 +45,7 @@
   #define RF69OOK_IRQ_PIN          3
   #define RF69OOK_IRQ_NUM          0
 #elif defined(ESP8266)
-  #define RF69OOK_IRQ_PIN          5
+  #define RF69OOK_IRQ_PIN          D1
   #define RF69OOK_IRQ_NUM          0
 #endif
 
