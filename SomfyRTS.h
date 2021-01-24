@@ -34,6 +34,7 @@
 #ifndef SOMFY_RTS_H
 #define SOMFY_RTS_H
 #include <Arduino.h>
+#include <EEPROM.h>
 
 #define SYMBOL 640
 #define UP 0x2
@@ -61,6 +62,9 @@ class SomfyRTS {
       _transmitterType = transmitterType;
 
       initRadio();
+      #ifdef ESP8266
+      EEPROM.begin(512);
+      #endif
     }
 
   protected:

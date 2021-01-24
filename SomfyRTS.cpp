@@ -122,6 +122,9 @@ void SomfyRTS::buildFrameSomfy() {
   EEPROM.put(_EEPROM_address + 2 * _virtualRemoteNumber, Code + 1); //  We store the value of the rolling code in the
   // EEPROM. It should take up to 2 adresses but the
   // Arduino function takes care of it.
+  #ifdef ESP8266
+  EEPROM.commit();
+  #endif
 }
 
 void SomfyRTS::sendCommandSomfy(byte sync) {
