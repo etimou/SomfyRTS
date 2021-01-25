@@ -5,7 +5,7 @@
 If you want to learn more about the Somfy RTS protocol, check out [Pushtack](https://pushstack.wordpress.com/somfy-rts-protocol/).
 
 **How the hardware works:** You will need:
-- An Arduino
+- An Arduino (works with an ESP8266 board)
 - A 433.42 Mhz RF transmitter. Generally you can't find a 433.42 MHz transmitter, so you need to buy a 433.92 MHz transmitter and replace its crystal by a 433.42 MHz crystal.
 
   **OR**
