@@ -68,7 +68,7 @@ void SomfyRTS::initRadio() {
 
 void SomfyRTS::configRTS(unsigned int EEPROM_address, unsigned long RTS_address) {
   _EEPROM_address = EEPROM_address;
-  //_RTS_address = RTS_address;
+  _RTS_address = RTS_address;
 }
 
 void SomfyRTS::setHighPower(bool onOFF){ //have to call it after initialize for RFM69HW
