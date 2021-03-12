@@ -39,6 +39,16 @@
 #include "RFM69OOK.h"
 #include "RFM69OOKregisters.h"
 
+#if defined(ESP8266) || defined(ESP32)
+//  #define TRANSMIT_HIGH(pin) (digitalWrite(pin, HIGH))
+//  #define TRANSMIT_LOW(pin) (digitalWrite(pin, LOW))
+  #define TRANSMIT_HIGH(pin) (GPOS = 1<<pin)
+  #define TRANSMIT_LOW(pin) (GPOC = 1<<pin)
+#else
+  #define TRANSMIT_HIGH(pin) (PORTD |= 1<<pin)
+  #define TRANSMIT_LOW(pin) (PORTD &= !(1<<pin))
+#endif
+
 
 RFM69OOK radio;
 
@@ -130,45 +140,45 @@ void SomfyRTS::buildFrameSomfy() {
 void SomfyRTS::sendCommandSomfy(byte sync) {
   if (sync == 2) { // Only with the first frame.
     //Wake-up pulse & Silence
-    digitalWrite(_pinTx, HIGH);
+    TRANSMIT_HIGH(_pinTx);
     delayMicroseconds(9415);
-    digitalWrite(_pinTx, LOW);
+    TRANSMIT_LOW(_pinTx);
     //delayMicroseconds(89565U);
     delay(89);
   }
 
   // Hardware sync: two sync for the first frame, seven for the following ones.
   for (int i = 0; i < sync; i++) {
-    digitalWrite(_pinTx, HIGH);
+    TRANSMIT_HIGH(_pinTx);
     delayMicroseconds(4 * SYMBOL);
-    digitalWrite(_pinTx, LOW);
+    TRANSMIT_LOW(_pinTx);
     delayMicroseconds(4 * SYMBOL);
   }
 
   // Software sync
-  digitalWrite(_pinTx, HIGH);
+  TRANSMIT_HIGH(_pinTx);
   delayMicroseconds(4550);
-  digitalWrite(_pinTx, LOW);
+  TRANSMIT_LOW(_pinTx);
   delayMicroseconds(SYMBOL);
 
 
   //Data: bits are sent one by one, starting with the MSB.
   for (byte i = 0; i < 56; i++) {
     if (((frame[i / 8] >> (7 - (i % 8))) & 1) == 1) {
-      digitalWrite(_pinTx, LOW);
+      TRANSMIT_LOW(_pinTx);
       delayMicroseconds(SYMBOL);
-      digitalWrite(_pinTx, HIGH);
+      TRANSMIT_HIGH(_pinTx);
       delayMicroseconds(SYMBOL);
     }
     else {
-      digitalWrite(_pinTx, HIGH);
+      TRANSMIT_HIGH(_pinTx);
       delayMicroseconds(SYMBOL);
-      digitalWrite(_pinTx, LOW);
+      TRANSMIT_LOW(_pinTx);
       delayMicroseconds(SYMBOL);
     }
   }
 
-  digitalWrite(_pinTx, LOW);
+  TRANSMIT_LOW(_pinTx);
   delayMicroseconds(30415); // Inter-frame silence
 }
 
