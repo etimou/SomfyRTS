@@ -59,7 +59,7 @@ void SomfyRTS::initRadio() {
   {
 
     radio.initialize();
-    radio.transmitBegin();
+    radio.transmitEnd(); // Emitter in standby mode
     //radio.setFrequencyMHz(868.88);
     radio.setFrequencyMHz(433.42);
     radio.setPowerLevel(20);
@@ -186,6 +186,10 @@ void SomfyRTS::sendSomfy(unsigned char virtualRemoteNumber, unsigned char action
   _virtualRemoteNumber = virtualRemoteNumber;
   _actionCommand = actionCommand;
 
+  if (_transmitterType == TSR_RFM69) {
+    radio.transmitBegin(); // Emitter in TX mode
+  }
+
   buildFrameSomfy();
   noInterrupts();
   sendCommandSomfy(2);
@@ -193,4 +197,9 @@ void SomfyRTS::sendSomfy(unsigned char virtualRemoteNumber, unsigned char action
     sendCommandSomfy(7);
   }
   interrupts();
+
+  if (_transmitterType == TSR_RFM69) {
+    radio.transmitEnd(); // Emitter in standby mode
+  }
 }
+
