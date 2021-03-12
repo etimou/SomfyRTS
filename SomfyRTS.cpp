@@ -187,10 +187,10 @@ void SomfyRTS::sendSomfy(unsigned char virtualRemoteNumber, unsigned char action
   _actionCommand = actionCommand;
 
   buildFrameSomfy();
+  noInterrupts();
   sendCommandSomfy(2);
   for (int i = 0; i < 2; i++) {
     sendCommandSomfy(7);
   }
-
-
+  interrupts();
 }
