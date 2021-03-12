@@ -39,6 +39,16 @@
 #include "RFM69OOK.h"
 #include "RFM69OOKregisters.h"
 
+#if defined(ESP8266) || defined(ESP32)
+//  #define TRANSMIT_HIGH(pin) (digitalWrite(pin, HIGH))
+//  #define TRANSMIT_LOW(pin) (digitalWrite(pin, LOW))
+  #define TRANSMIT_HIGH(pin) (GPOS = 1<<pin)
+  #define TRANSMIT_LOW(pin) (GPOC = 1<<pin)
+#else
+  #define TRANSMIT_HIGH(pin) (PORTD |= 1<<pin)
+  #define TRANSMIT_LOW(pin) (PORTD &= !(1<<pin))
+#endif
+
 
 RFM69OOK radio;
 
@@ -58,7 +68,7 @@ void SomfyRTS::initRadio() {
 
 void SomfyRTS::configRTS(unsigned int EEPROM_address, unsigned long RTS_address) {
   _EEPROM_address = EEPROM_address;
-  //_RTS_address = RTS_address;
+  _RTS_address = RTS_address;
 }
 
 void SomfyRTS::setHighPower(bool onOFF){ //have to call it after initialize for RFM69HW
@@ -66,7 +76,7 @@ void SomfyRTS::setHighPower(bool onOFF){ //have to call it after initialize for 
 }
 
 void SomfyRTS::buildFrameSomfy() {
-  unsigned int Code;
+  uint16_t Code;
   EEPROM.get(_EEPROM_address + 2 * _virtualRemoteNumber, Code);
   frame[0] = 0xA7; // Encryption key. Doesn't matter much
   frame[1] = _actionCommand << 4;  // Which button did  you press? The 4 LSB will be the checksum
@@ -119,7 +129,7 @@ void SomfyRTS::buildFrameSomfy() {
   }
   //Serial.println("");
   //Serial.print("Rolling Code  : "); Serial.println(code);
-  EEPROM.put(_EEPROM_address + 2 * _virtualRemoteNumber, Code + 1); //  We store the value of the rolling code in the
+  EEPROM.put(_EEPROM_address + 2 * _virtualRemoteNumber, ++Code); //  We store the value of the rolling code in the
   // EEPROM. It should take up to 2 adresses but the
   // Arduino function takes care of it.
   #ifdef ESP8266
@@ -130,45 +140,45 @@ void SomfyRTS::buildFrameSomfy() {
 void SomfyRTS::sendCommandSomfy(byte sync) {
   if (sync == 2) { // Only with the first frame.
     //Wake-up pulse & Silence
-    digitalWrite(_pinTx, HIGH);
+    TRANSMIT_HIGH(_pinTx);
     delayMicroseconds(9415);
-    digitalWrite(_pinTx, LOW);
+    TRANSMIT_LOW(_pinTx);
     //delayMicroseconds(89565U);
     delay(89);
   }
 
   // Hardware sync: two sync for the first frame, seven for the following ones.
   for (int i = 0; i < sync; i++) {
-    digitalWrite(_pinTx, HIGH);
+    TRANSMIT_HIGH(_pinTx);
     delayMicroseconds(4 * SYMBOL);
-    digitalWrite(_pinTx, LOW);
+    TRANSMIT_LOW(_pinTx);
     delayMicroseconds(4 * SYMBOL);
   }
 
   // Software sync
-  digitalWrite(_pinTx, HIGH);
+  TRANSMIT_HIGH(_pinTx);
   delayMicroseconds(4550);
-  digitalWrite(_pinTx, LOW);
+  TRANSMIT_LOW(_pinTx);
   delayMicroseconds(SYMBOL);
 
 
   //Data: bits are sent one by one, starting with the MSB.
   for (byte i = 0; i < 56; i++) {
     if (((frame[i / 8] >> (7 - (i % 8))) & 1) == 1) {
-      digitalWrite(_pinTx, LOW);
+      TRANSMIT_LOW(_pinTx);
       delayMicroseconds(SYMBOL);
-      digitalWrite(_pinTx, HIGH);
+      TRANSMIT_HIGH(_pinTx);
       delayMicroseconds(SYMBOL);
     }
     else {
-      digitalWrite(_pinTx, HIGH);
+      TRANSMIT_HIGH(_pinTx);
       delayMicroseconds(SYMBOL);
-      digitalWrite(_pinTx, LOW);
+      TRANSMIT_LOW(_pinTx);
       delayMicroseconds(SYMBOL);
     }
   }
 
-  digitalWrite(_pinTx, LOW);
+  TRANSMIT_LOW(_pinTx);
   delayMicroseconds(30415); // Inter-frame silence
 }
 
@@ -177,10 +187,10 @@ void SomfyRTS::sendSomfy(unsigned char virtualRemoteNumber, unsigned char action
   _actionCommand = actionCommand;
 
   buildFrameSomfy();
+  noInterrupts();
   sendCommandSomfy(2);
   for (int i = 0; i < 2; i++) {
     sendCommandSomfy(7);
   }
-
-
+  interrupts();
 }
