@@ -59,7 +59,6 @@ void SomfyRTS::initRadio() {
   {
 
     radio.initialize();
-    radio.transmitEnd(); // Emitter in standby mode
     //radio.setFrequencyMHz(868.88);
     radio.setFrequencyMHz(433.42);
     radio.setPowerLevel(20);
