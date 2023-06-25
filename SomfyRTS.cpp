@@ -39,11 +39,14 @@
 #include "RFM69OOK.h"
 #include "RFM69OOKregisters.h"
 
-#if defined(ESP8266) || defined(ESP32)
+#if defined(ESP8266)
 //  #define TRANSMIT_HIGH(pin) (digitalWrite(pin, HIGH))
 //  #define TRANSMIT_LOW(pin) (digitalWrite(pin, LOW))
   #define TRANSMIT_HIGH(pin) (GPOS = 1<<pin)
   #define TRANSMIT_LOW(pin) (GPOC = 1<<pin)
+#elif defined(ESP32)
+  #define TRANSMIT_HIGH(pin) (GPIO.out_w1ts = ((uint32_t)1 << pin)) // only for GPIOs < 32
+  #define TRANSMIT_LOW(pin) (GPIO.out_w1tc = ((uint32_t)1 << pin)) // only for GPIOs < 32
 #else
   #define TRANSMIT_HIGH(pin) (PORTD |= 1<<pin)
   #define TRANSMIT_LOW(pin) (PORTD &= !(1<<pin))
@@ -77,7 +80,15 @@ void SomfyRTS::setHighPower(bool onOFF){ //have to call it after initialize for 
 
 void SomfyRTS::buildFrameSomfy() {
   uint16_t Code;
-  EEPROM.get(_EEPROM_address + 2 * _virtualRemoteNumber, Code);
+  
+  if (ESP32) {
+    preferences.begin("somfyRTS", false);
+    char codeStr[4];
+    sprintf(codeStr, "%d", _virtualRemoteNumber);
+    Code = preferences.getUShort(codeStr, 0);
+  }
+  else
+    EEPROM.get(_EEPROM_address + 2 * _virtualRemoteNumber, Code);
   frame[0] = 0xA7; // Encryption key. Doesn't matter much
   frame[1] = _actionCommand << 4;  // Which button did  you press? The 4 LSB will be the checksum
   frame[2] = Code >> 8;    // Rolling code (big endian)
@@ -85,7 +96,6 @@ void SomfyRTS::buildFrameSomfy() {
   frame[4] = _RTS_address + _virtualRemoteNumber >> 16; // Remote address
   frame[5] = _RTS_address + _virtualRemoteNumber >>  8; // Remote address
   frame[6] = _RTS_address + _virtualRemoteNumber;     // Remote address
-
   //Serial.print("Frame         : ");
   for (byte i = 0; i < 7; i++) {
     if (frame[i] >> 4 == 0) { //  Displays leading zero in case the most significant
@@ -128,8 +138,14 @@ void SomfyRTS::buildFrameSomfy() {
     //Serial.print(frame[i],HEX); Serial.print(" ");
   }
   //Serial.println("");
-  //Serial.print("Rolling Code  : "); Serial.println(code);
-  EEPROM.put(_EEPROM_address + 2 * _virtualRemoteNumber, ++Code); //  We store the value of the rolling code in the
+  if (ESP32) {
+    char codeStr[4];
+    sprintf(codeStr, "%d", _virtualRemoteNumber);
+    preferences.putUShort(codeStr, ++Code);
+    preferences.end();
+  }
+  else
+    EEPROM.put(_EEPROM_address + 2 * _virtualRemoteNumber, ++Code); //  We store the value of the rolling code in the
   // EEPROM. It should take up to 2 adresses but the
   // Arduino function takes care of it.
   #ifdef ESP8266

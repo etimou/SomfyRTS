@@ -36,6 +36,8 @@ volatile byte RFM69OOK::_mode;  // current transceiver state
 volatile int RFM69OOK::RSSI; 	// most accurate RSSI during reception (closest to the reception)
 RFM69OOK* RFM69OOK::selfPointer;
 
+#define ESP ESP8266 || ESP32
+
 bool RFM69OOK::initialize()
 {
   const byte CONFIG[][2] =
@@ -252,11 +254,11 @@ void RFM69OOK::writeReg(byte addr, byte value)
 void RFM69OOK::select() {
   noInterrupts();
   // save current SPI settings
-  #ifndef ESP8266
+  #ifndef ESP
   _SPCR = SPCR;
   _SPSR = SPSR;
   #endif
-  // set RFM69 SPI settings
+   // set RFM69 SPI settings
   SPI.setDataMode(SPI_MODE0);
   SPI.setBitOrder(MSBFIRST);
   SPI.setClockDivider(SPI_CLOCK_DIV4); //decided to slow down from DIV2 after SPI stalling in some instances, especially visible on mega1284p when RFM69 and FLASH chip both present
@@ -267,11 +269,11 @@ void RFM69OOK::select() {
 void RFM69OOK::unselect() {
   digitalWrite(_slaveSelectPin, HIGH);
   // restore SPI settings to what they were before talking to RFM69
-  #ifndef ESP8266 
+  #ifndef ESP 
   SPCR = _SPCR;
   SPSR = _SPSR;
   #endif
-  interrupts();
+    interrupts();
 }
 
 void RFM69OOK::setHighPower(bool onOff) {
