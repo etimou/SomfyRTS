@@ -36,7 +36,12 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 
-#define SYMBOL 640
+#ifdef ESP32
+  #include <Preferences.h>
+#endif
+
+//#define SYMBOL 640
+#define SYMBOL 604
 #define UP 0x2
 #define STOP 0x1
 #define DOWN 0x4
@@ -61,7 +66,7 @@ class SomfyRTS {
       _virtualRemoteNumber = 0;
       _transmitterType = transmitterType;
 
-      initRadio();
+            initRadio();
       #ifdef ESP8266
       EEPROM.begin(512);
       #endif
@@ -71,7 +76,10 @@ class SomfyRTS {
     void sendCommandSomfy(byte sync);
     void buildFrameSomfy();
 
-
+    #ifdef ESP32
+      Preferences preferences;
+    #endif 
+    
     byte _pinTx;
     unsigned int _EEPROM_address;
     unsigned long _RTS_address;
